@@ -110,3 +110,13 @@ form label.checkbox {
 form label.checkbox input {
   margin-left: 6px;
 }
+/* ===== FINAL, FINAL FIX ===== */
+
+.checkbox-row {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.checkbox-row label {
+  display: inline;
+}
