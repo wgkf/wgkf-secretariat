@@ -19,9 +19,11 @@
 
 /* ================= PLAIN INLINE CHECKBOX ================= */
 
+/* ================= INLINE CHECKBOX – FINAL FIX ================= */
+
 .checkbox {
+  display: inline-block;
   font-size: 14px;
-  margin: 12px 0;
   cursor: pointer;
 }
 
@@ -32,7 +34,7 @@
 .checkbox input {
   margin-left: 6px;
 }
-y
+
 
 /* Announcement list */
 .simple-list {
