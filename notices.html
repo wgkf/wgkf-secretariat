@@ -29,78 +29,109 @@
 
   <header class="wizard-header">
     <h2>Create Official Notice</h2>
-    <p class="subhead">Guided • System-generated • Safe</p>
+    <p class="subhead">Guided · System-generated · Official record</p>
   </header>
 
   <!-- STEP 1 -->
   <div class="wizard-step" data-step="1">
-    <h3>1) Choose Notice Group</h3>
+    <h3>Notice Category</h3>
+    <p class="step-help">Select the institutional context of this notice.</p>
+
     <div class="options">
       <button data-group="class_status">Class Status</button>
       <button data-group="examination">Examination</button>
       <button data-group="meeting">Meeting</button>
       <button data-group="general">General</button>
-      <button class="primary-action" id="nextStep1" disabled>Next</button>
     </div>
   </div>
 
   <!-- STEP 2 -->
   <div class="wizard-step hidden" data-step="2">
-    <h3>2) Choose Action</h3>
-    <div class="options" id="actions"></div>
-    <button class="secondary-action" id="backStep2">Back</button>
-<button class="primary-action" id="nextStep2" disabled>Next</button>
+    <h3>Action</h3>
+    <p class="step-help">Choose the official action being announced.</p>
 
+    <div class="options" id="actions"></div>
+
+    <div class="nav-row">
+      <button class="secondary-action" id="backStep2">Back</button>
+    </div>
   </div>
 
   <!-- STEP 3 -->
   <div class="wizard-step hidden" data-step="3">
-    <h3>3) Effective Date</h3>
-    <input type="date" id="effectiveDate" />
-    <button class="secondary-action" id="backStep3">Back</button>
-<button class="primary-action" id="nextStep3" disabled>Next</button>
+    <h3>Effective Date</h3>
+    <p class="step-help">Date from which this notice takes effect.</p>
 
+    <input type="date" id="effectiveDate" class="input-field" />
+
+    <div class="nav-row">
+      <button class="secondary-action" id="backStep3">Back</button>
+    </div>
   </div>
 
   <!-- STEP 4 -->
   <div class="wizard-step hidden" data-step="4">
-    <h3>4) Reason (Optional)</h3>
+    <h3>Reason (Optional)</h3>
+    <p class="step-help">Provide a standardised reason, if applicable.</p>
+
     <div class="options">
       <button data-reason="">None</button>
       <button data-reason="holiday">Holiday</button>
       <button data-reason="weather">Weather</button>
       <button data-reason="emergency">Emergency</button>
       <button data-reason="administrative">Administrative</button>
-      <button class="secondary-action" id="backStep4">Back</button>
-<button class="primary-action" id="nextStep4" disabled>Next</button>
+    </div>
 
+    <div class="nav-row">
+      <button class="secondary-action" id="backStep4">Back</button>
     </div>
   </div>
 
   <!-- STEP 5 -->
   <div class="wizard-step hidden" data-step="5">
-    <h3>5) Publish</h3>
-    <label class="radio">
-      <input type="radio" name="publishMode" value="now" checked />
-      Publish now
-    </label>
-    <label class="radio">
-      <input type="radio" name="publishMode" value="later" />
-      Schedule for later
-    </label>
-    <input type="datetime-local" id="publishAt" class="hidden" />
-    <button class="secondary-action" id="backStep5">Back</button>
-<button class="primary-action" id="nextStep5" disabled>Next</button>
+    <h3>Publish Settings</h3>
+    <p class="step-help">Choose when this notice should become visible.</p>
 
+    <div class="publish-box">
+      <label class="radio">
+        <input type="radio" name="publishMode" value="now" checked />
+        <span>
+          <strong>Publish now</strong><br>
+          <small>Notice becomes active immediately</small>
+        </span>
+      </label>
+
+      <label class="radio">
+        <input type="radio" name="publishMode" value="later" />
+        <span>
+          <strong>Schedule for later</strong><br>
+          <small>Set a future publish date & time</small>
+        </span>
+      </label>
+
+      <input type="datetime-local" id="publishAt" class="input-field hidden" />
+    </div>
+
+    <div class="nav-row">
+      <button class="secondary-action" id="backStep5">Back</button>
+    </div>
   </div>
 
   <!-- STEP 6 -->
   <div class="wizard-step hidden" data-step="6">
-    <h3>Preview</h3>
+    <h3>Preview & Confirm</h3>
+    <p class="step-help">Review the official notice before publishing.</p>
+
     <div id="preview" class="preview"></div>
-    <button class="secondary-action" id="backStep6">Back</button>
-   <button class="primary-action" id="confirmPublish" disabled>Confirm & Publish</button>
-    <button class="secondary-action" id="cancelWizard">Cancel</button>
+
+    <div class="nav-row split">
+      <button class="secondary-action" id="backStep6">Back</button>
+      <button class="primary-action" id="confirmPublish" disabled>
+        Confirm & Publish
+      </button>
+    </div>
+
+    <button class="text-action" id="cancelWizard">Cancel notice creation</button>
   </div>
 
 </section>
