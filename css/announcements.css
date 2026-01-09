@@ -120,3 +120,7 @@ form label.checkbox input {
 .checkbox-row label {
   display: inline;
 }
+/* FORCE LEFT ALIGNMENT FOR CHECKBOX LINE */
+form label.checkbox {
+  text-align: left;
+}
