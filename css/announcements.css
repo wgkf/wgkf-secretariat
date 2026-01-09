@@ -124,3 +124,18 @@ form label.checkbox input {
 form label.checkbox {
   text-align: left;
 }
+/* ===== FINAL, WORKING CHECKBOX ALIGNMENT ===== */
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 8px 0;
+}
+
+.checkbox-row label {
+  display: inline-flex;      /* overrides form label */
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
