@@ -133,18 +133,19 @@ function bindDom() {
     }
   );
 
-  document.querySelectorAll('input[name="publishMode"]').forEach(r =>
-    r.onchange = () => {
-      if (r.value === "later") {
-        dom.publishAt.classList.remove("hidden");
-        state.wizard.publish_at = null;
-      } else {
-        dom.publishAt.classList.add("hidden");
-        state.wizard.publish_at = new Date().toISOString();
-        setTimeout(() => goto(STEP.PREVIEW), 120);
-      }
+  document.querySelectorAll('input[name="publishMode"]').forEach(r => {
+  r.onchange = () => {
+    if (r.value === "later") {
+      dom.publishAt.classList.remove("hidden");
+      state.wizard.publish_at = null;
+    } else {
+      dom.publishAt.classList.add("hidden");
+      state.wizard.publish_at = new Date().toISOString();
+      setTimeout(() => goto(STEP.PREVIEW), 120);
     }
-  );
+  };
+});
+
 
   dom.publishAt.onchange = e => {
     state.wizard.publish_at = new Date(e.target.value).toISOString();
@@ -172,11 +173,12 @@ function goto(step) {
   state.wizard.step = step;
 
   if (step === STEP.PUBLISH) {
-    initPublishStep(); // 🔑 FIX
+    initialisePublishStep(); // 🔑 FIXES DEAD DEFAULT
   }
 
   render();
 }
+
 
 
 function resetWizard() {
@@ -298,6 +300,24 @@ function initPublishStep() {
   if (checked.value === "now") {
     dom.publishAt.classList.add("hidden");
     state.wizard.publish_at = new Date().toISOString();
+  } else {
+    dom.publishAt.classList.remove("hidden");
+    state.wizard.publish_at = null;
+  }
+}
+function initialisePublishStep() {
+  const checked = document.querySelector(
+    'input[name="publishMode"]:checked'
+  );
+
+  if (!checked) return;
+
+  if (checked.value === "now") {
+    dom.publishAt.classList.add("hidden");
+    state.wizard.publish_at = new Date().toISOString();
+
+    // auto-advance because "now" is already valid
+    setTimeout(() => goto(STEP.PREVIEW), 120);
   } else {
     dom.publishAt.classList.remove("hidden");
     state.wizard.publish_at = null;
