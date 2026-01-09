@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WGKF Secretariat – Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Libre+Baskerville&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/secretariat.css">
+</head>
+
+<body>
+
+<main class="dashboard-wrapper">
+
+  <header class="dashboard-header">
+    <h1>West Bengal Goju-Ryu Karate-Do Foundation</h1>
+    <p class="subhead">Secretariat Portal</p>
+  </header>
+
+  <section class="dashboard-section">
+
+    <button class="primary-action" onclick="goTo('notices.html')">
+      Issue New Notice
+    </button>
+
+  </section>
+
+  <section class="dashboard-section">
+
+    <h2>Records</h2>
+
+    <button class="secondary-action" onclick="goTo('notices.html#scheduled')">
+      Scheduled Notices
+    </button>
+
+    <button class="secondary-action" onclick="goTo('notices.html#active')">
+      Active Notices
+    </button>
+
+    <button class="secondary-action" onclick="goTo('notices.html#archive')">
+      Archive (View Only)
+    </button>
+
+  </section>
+
+  <section class="dashboard-section muted">
+
+    <h2>Media (Coming Soon)</h2>
+
+    <button class="disabled-action" disabled>
+      Photo Gallery
+    </button>
+
+    <button class="disabled-action" disabled>
+      Short Videos
+    </button>
+
+  </section>
+
+  <footer class="dashboard-footer">
+    <button class="logout" onclick="logout()">Logout</button>
+  </footer>
+
+</main>
+
+<script src="js/dashboard.js"></script>
+</body>
+</html>

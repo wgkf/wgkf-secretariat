@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WGKF Secretariat – Notices</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Libre+Baskerville&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/secretariat.css">
+</head>
+
+<body>
+
+<main class="notices-wrapper">
+
+  <header class="dashboard-header">
+    <h1>Secretariat</h1>
+    <p class="subhead">Notice Management</p>
+  </header>
+
+  <!-- CREATE NOTICE -->
+  <section class="dashboard-section">
+    <button class="primary-action" onclick="startNewNotice()">
+      Create New Notice
+    </button>
+  </section>
+<!-- NOTICE WIZARD -->
+<section id="wizard" class="wizard hidden">
+
+  <header class="wizard-header">
+    <h2>Create Official Notice</h2>
+    <p class="subhead">Guided • System-generated • Safe</p>
+  </header>
+
+  <!-- STEP 1 -->
+  <div class="wizard-step" data-step="1">
+    <h3>1) Choose Notice Group</h3>
+    <div class="options">
+      <button data-group="class_status">Class Status</button>
+      <button data-group="examination">Examination</button>
+      <button data-group="meeting">Meeting</button>
+      <button data-group="general">General</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="wizard-step hidden" data-step="2">
+    <h3>2) Choose Action</h3>
+    <div class="options" id="actions"></div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="wizard-step hidden" data-step="3">
+    <h3>3) Effective Date</h3>
+    <input type="date" id="effectiveDate" />
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="wizard-step hidden" data-step="4">
+    <h3>4) Reason (Optional)</h3>
+    <div class="options">
+      <button data-reason="">None</button>
+      <button data-reason="holiday">Holiday</button>
+      <button data-reason="weather">Weather</button>
+      <button data-reason="emergency">Emergency</button>
+      <button data-reason="administrative">Administrative</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="wizard-step hidden" data-step="5">
+    <h3>5) Publish</h3>
+    <label class="radio">
+      <input type="radio" name="publishMode" value="now" checked />
+      Publish now
+    </label>
+    <label class="radio">
+      <input type="radio" name="publishMode" value="later" />
+      Schedule for later
+    </label>
+    <input type="datetime-local" id="publishAt" class="hidden" />
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="wizard-step hidden" data-step="6">
+    <h3>Preview</h3>
+    <div id="preview" class="preview"></div>
+    <button class="primary-action" id="confirmPublish">Confirm & Publish</button>
+    <button class="secondary-action" id="cancelWizard">Cancel</button>
+  </div>
+
+</section>
+
+  <!-- ACTIVE / SCHEDULED / ARCHIVE -->
+  <section class="dashboard-section">
+    <h2>Records</h2>
+
+    <div id="noticeList">
+      <p class="muted">Loading notices…</p>
+    </div>
+  </section>
+
+  <footer class="dashboard-footer">
+    <button class="logout" onclick="goBack()">Back to Dashboard</button>
+  </footer>
+
+</main>
+
+<script src="js/notices.js"></script>
+</body>
+</html>
