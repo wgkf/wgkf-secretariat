@@ -96,7 +96,8 @@ function bindDom() {
     back2: document.getElementById("backStep2"),
     back3: document.getElementById("backStep3"),
     back4: document.getElementById("backStep4"),
-    back5: document.getElementById("backStep5")
+    back5: document.getElementById("backStep5"),
+    back6: document.getElementById("backStep6")
   };
 
   dom.startBtn.onclick = startWizard;
@@ -108,6 +109,7 @@ function bindDom() {
   dom.back3.onclick = () => goto(STEP.ACTION);
   dom.back4.onclick = () => goto(STEP.DATE);
   dom.back5.onclick = () => goto(STEP.REASON);
+  if (dom.back6) dom.back6.onclick = () => goto(STEP.PUBLISH);
 
   document.querySelectorAll("[data-group]").forEach(b =>
     b.onclick = () => {
@@ -139,16 +141,17 @@ function bindDom() {
       } else {
         dom.publishAt.classList.add("hidden");
         state.wizard.publish_at = new Date().toISOString();
-        goto(STEP.PREVIEW);
+        setTimeout(() => goto(STEP.PREVIEW), 120);
       }
     }
   );
 
   dom.publishAt.onchange = e => {
     state.wizard.publish_at = new Date(e.target.value).toISOString();
-    goto(STEP.PREVIEW);
+    setTimeout(() => goto(STEP.PREVIEW), 120);
   };
 }
+
 
 /* =========================================================
    WIZARD CONTROL
@@ -167,8 +170,14 @@ function cancelWizard() {
 
 function goto(step) {
   state.wizard.step = step;
+
+  if (step === STEP.PUBLISH) {
+    initPublishStep(); // 🔑 FIX
+  }
+
   render();
 }
+
 
 function resetWizard() {
   state.wizard = {
@@ -279,6 +288,20 @@ function setActive(btn) {
   btn.parentElement.querySelectorAll("button")
     .forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
+}
+
+function initPublishStep() {
+  const checked = document.querySelector('input[name="publishMode"]:checked');
+
+  if (!checked) return;
+
+  if (checked.value === "now") {
+    dom.publishAt.classList.add("hidden");
+    state.wizard.publish_at = new Date().toISOString();
+  } else {
+    dom.publishAt.classList.remove("hidden");
+    state.wizard.publish_at = null;
+  }
 }
 
 /* =========================================================
