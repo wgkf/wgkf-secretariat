@@ -21,8 +21,10 @@ textArea.addEventListener("input", () => {
 });
 
 /* ================= EXPIRY TOGGLE ================= */
+const expiryBox = document.getElementById("expiryBox");
+
 expiryCheckbox.addEventListener("change", () => {
-  expiryInput.classList.toggle("hidden", !expiryCheckbox.checked);
+  expiryBox.classList.toggle("hidden", !expiryCheckbox.checked);
 });
 
 /* ================= PUBLISH ================= */

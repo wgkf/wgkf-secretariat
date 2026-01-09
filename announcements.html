@@ -49,11 +49,27 @@
       Auto-expire this announcement
     </label>
 
-    <input
-      type="datetime-local"
-      id="expiryTime"
-      class="input-field hidden"
-    />
+    <div id="expiryBox" class="hidden">
+
+  <label for="expiryTime" class="field-label">
+    Expiry Date & Time
+  </label>
+
+  <input
+    type="datetime-local"
+    id="expiryTime"
+    class="input-field"
+  />
+
+  <p class="field-help">
+    The announcement will automatically stop appearing on the website
+    after this date and time.
+    <br>
+    <strong>Uses your local system time.</strong>
+  </p>
+
+</div>
+
 
     <button class="primary-action" id="publishAnnouncement">
       Publish Announcement
@@ -72,9 +88,10 @@
 
   <!-- FOOTER -->
   <footer class="dashboard-footer">
-    <button class="logout" onclick="goTo('dashboard.html')">
-      Back to Dashboard
-    </button>
+   <button class="logout" onclick="window.location.href='dashboard.html'">
+  Back to Dashboard
+</button>
+
   </footer>
 
 </main>
