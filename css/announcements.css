@@ -11,29 +11,6 @@
   margin: 6px 2px 12px;
 }
 
-/* ================= INLINE CHECKBOX FIX ================= */
-
-/* ================= INLINE SINGLE-LINE CHECKBOX ================= */
-
-/* ================= INLINE TEXT CHECKBOX (PERFECT) ================= */
-
-/* ================= PLAIN INLINE CHECKBOX ================= */
-
-/* ================= INLINE CHECKBOX – FINAL FIX ================= */
-
-.checkbox {
-  display: inline-block;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.checkbox span {
-  display: inline;
-}
-
-.checkbox input {
-  margin-left: 6px;
-}
 
 
 /* Announcement list */
@@ -122,4 +99,14 @@
   .simple-list li {
     padding: 14px;
   }
+}
+/* ===== FINAL FIX: INLINE CHECKBOX LABEL ===== */
+
+form label.checkbox {
+  display: inline;      /* override form label { display:block } */
+  margin: 0;            /* remove forced spacing */
+}
+
+form label.checkbox input {
+  margin-left: 6px;
 }
