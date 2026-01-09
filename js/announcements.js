@@ -34,6 +34,8 @@ publishBtn.addEventListener("click", async () => {
     return;
   }
 
+  publishBtn.disabled = true;
+
   const payload = {
     content,
     is_active: true
@@ -47,12 +49,15 @@ publishBtn.addEventListener("click", async () => {
     .from("announcements")
     .insert(payload);
 
+  publishBtn.disabled = false;
+
   if (error) {
     alert("Failed to publish announcement.");
     console.error(error);
     return;
   }
 
+  // Reset UI
   textArea.value = "";
   expiryCheckbox.checked = false;
   expiryInput.classList.add("hidden");
@@ -64,7 +69,7 @@ publishBtn.addEventListener("click", async () => {
 /* ================= LOAD ================= */
 async function loadAnnouncements() {
 
-  list.innerHTML = "<li class='muted'>Loading…</li>";
+  list.innerHTML = "<li class='muted'>Loading announcements…</li>";
 
   const { data, error } = await supabase
     .from("announcements")
@@ -74,7 +79,7 @@ async function loadAnnouncements() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    list.innerHTML = "<li>Error loading announcements</li>";
+    list.innerHTML = "<li class='muted'>Error loading announcements</li>";
     console.error(error);
     return;
   }
@@ -89,22 +94,34 @@ async function loadAnnouncements() {
   data.forEach(a => {
     const li = document.createElement("li");
 
-    const text = document.createElement("span");
-    text.textContent = a.content;
+    /* Content block */
+    const content = document.createElement("div");
+    content.className = "content";
+    content.textContent = a.content;
 
-    const del = document.createElement("button");
-    del.textContent = "Delete";
-    del.onclick = () => deleteAnnouncement(a.id);
+    /* Meta */
+    const meta = document.createElement("small");
+    const created = new Date(a.created_at).toLocaleDateString();
+    meta.textContent = a.expires_at
+      ? `Published ${created} • Expires ${new Date(a.expires_at).toLocaleString()}`
+      : `Published ${created}`;
 
-    li.append(text, del);
+    content.appendChild(meta);
+
+    /* Action */
+    const deactivateBtn = document.createElement("button");
+    deactivateBtn.textContent = "Deactivate";
+    deactivateBtn.onclick = () => deactivateAnnouncement(a.id);
+
+    li.append(content, deactivateBtn);
     list.appendChild(li);
   });
 }
 
-/* ================= DELETE ================= */
-async function deleteAnnouncement(id) {
+/* ================= DEACTIVATE ================= */
+async function deactivateAnnouncement(id) {
 
-  if (!confirm("Delete this announcement?")) return;
+  if (!confirm("Deactivate this announcement?")) return;
 
   const { error } = await supabase
     .from("announcements")
@@ -112,7 +129,7 @@ async function deleteAnnouncement(id) {
     .eq("id", id);
 
   if (error) {
-    alert("Failed to delete");
+    alert("Failed to deactivate announcement.");
     console.error(error);
     return;
   }
