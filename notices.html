@@ -20,7 +20,7 @@
 
   <!-- CREATE NOTICE -->
   <section class="dashboard-section">
-    <button class="primary-action" onclick="startNewNotice()">
+<button class="primary-action" id="startNoticeBtn">
       Create New Notice
     </button>
   </section>
@@ -85,7 +85,7 @@
   <div class="wizard-step hidden" data-step="6">
     <h3>Preview</h3>
     <div id="preview" class="preview"></div>
-    <button class="primary-action" id="confirmPublish">Confirm & Publish</button>
+   <button class="primary-action" id="confirmPublish" disabled>Confirm & Publish</button>
     <button class="secondary-action" id="cancelWizard">Cancel</button>
   </div>
 
@@ -101,7 +101,7 @@
   </section>
 
   <footer class="dashboard-footer">
-    <button class="logout" onclick="goBack()">Back to Dashboard</button>
+<button class="logout" id="backToDashboardBtn">Back to Dashboard</button>
   </footer>
 
 </main>
