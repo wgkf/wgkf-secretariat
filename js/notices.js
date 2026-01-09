@@ -51,8 +51,11 @@ async function loadNotices() {
 }
 
 window.startNewNotice = function () {
-  alert("Notice creation wizard will open next (Phase 6D).");
+  const wizard = document.getElementById("wizard");
+  wizard.classList.remove("hidden");
+  showStep(1);
 };
+
 
 window.issueCorrection = function (id) {
   alert("Correction flow will open for notice ID: " + id);
@@ -61,3 +64,4 @@ window.issueCorrection = function (id) {
 window.goBack = function () {
   window.location.href = "dashboard.html";
 };
+
