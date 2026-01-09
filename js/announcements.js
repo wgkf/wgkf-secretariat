@@ -132,10 +132,11 @@ async function deactivateAnnouncement(id) {
     .eq("id", id);
 
   if (error) {
-    alert("Failed to deactivate announcement.");
-    console.error(error);
-    return;
-  }
+  alert(error.message);
+  console.error("FULL ERROR OBJECT:", error);
+  return;
+}
+
 
   loadAnnouncements();
 }
