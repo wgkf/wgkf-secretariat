@@ -13,14 +13,17 @@
 
 /* Checkbox */
 .checkbox {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   font-size: 14px;
   margin: 12px 0;
   cursor: pointer;
 }
 
 .checkbox input {
-  margin-right: 6px;
+  flex-shrink: 0;
 }
 
 /* Announcement list */
