@@ -6,6 +6,19 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuY2NvcXR0YnNya2dpcWh6dnNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MDczMjEsImV4cCI6MjA4MzQ4MzMyMX0.ObeLI4w7sZutjUQvP8HK_cxVPngpgfx8gJIzQutdTio"
 );
 
+/* ================= AUTH GUARD ================= */
+async function requireAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    alert("Session expired. Please login again.");
+    window.location.href = "index.html";
+    throw new Error("Not authenticated");
+  }
+
+  return session;
+}
+
 /* ================= ELEMENTS ================= */
 const textArea = document.getElementById("announcementText");
 const charCount = document.getElementById("charCount");
@@ -29,6 +42,8 @@ expiryCheckbox.addEventListener("change", () => {
 
 /* ================= PUBLISH ================= */
 publishBtn.addEventListener("click", async () => {
+
+      await requireAuth();
 
   const content = textArea.value.trim();
   if (!content) {
@@ -123,6 +138,8 @@ async function loadAnnouncements() {
 
 /* ================= DEACTIVATE ================= */
 async function deactivateAnnouncement(id) {
+
+      await requireAuth();
 
   if (!confirm("Deactivate this announcement?")) return;
 
