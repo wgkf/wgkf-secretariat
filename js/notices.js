@@ -64,4 +64,145 @@ window.issueCorrection = function (id) {
 window.goBack = function () {
   window.location.href = "dashboard.html";
 };
+/* ================= NOTICE WIZARD LOGIC ================= */
+
+// Wizard elements
+const wizard = document.getElementById("wizard");
+const steps = [...document.querySelectorAll(".wizard-step")];
+
+// Wizard state
+const state = {
+  notice_group: null,
+  notice_action: null,
+  effective_date: null,
+  reason_code: null,
+  publish_at: null,
+  supersedes_id: null
+};
+
+// Allowed actions per group (LOCKED)
+const ACTIONS = {
+  class_status: ["open", "closed", "rescheduled"],
+  examination: ["registration_open", "registration_closed", "exam_date_announced"],
+  meeting: ["guardian_meeting", "instructor_meeting"],
+  general: ["holiday", "seminar", "important_info", "correction"]
+};
+
+// Show step helper
+function showStep(stepNumber) {
+  steps.forEach(s => s.classList.add("hidden"));
+  const step = document.querySelector(`.wizard-step[data-step="${stepNumber}"]`);
+  if (step) step.classList.remove("hidden");
+
+  if (stepNumber === 6) renderPreview();
+}
+
+// Step 1: notice group selection
+document.querySelectorAll("[data-group]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.notice_group = btn.dataset.group;
+    setActive(btn);
+    loadActions();
+    showStep(2);
+  });
+});
+
+// Step 2: load actions dynamically
+function loadActions() {
+  const actionsBox = document.getElementById("actions");
+  actionsBox.innerHTML = "";
+
+  ACTIONS[state.notice_group].forEach(action => {
+    const b = document.createElement("button");
+    b.textContent = action.replace(/_/g, " ");
+    b.addEventListener("click", () => {
+      state.notice_action = action;
+      setActive(b);
+      showStep(3);
+    });
+    actionsBox.appendChild(b);
+  });
+}
+
+// Step 3: effective date
+document.getElementById("effectiveDate").addEventListener("change", e => {
+  state.effective_date = e.target.value;
+  showStep(4);
+});
+
+// Step 4: reason (optional)
+document.querySelectorAll("[data-reason]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.reason_code = btn.dataset.reason || null;
+    setActive(btn);
+    showStep(5);
+  });
+});
+
+// Step 5: publish mode
+document.querySelectorAll('input[name="publishMode"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    const dt = document.getElementById("publishAt");
+    if (radio.value === "later") {
+      dt.classList.remove("hidden");
+      state.publish_at = null;
+    } else {
+      dt.classList.add("hidden");
+      state.publish_at = new Date().toISOString();
+      showStep(6);
+    }
+  });
+});
+
+// Scheduled publish datetime
+document.getElementById("publishAt").addEventListener("change", e => {
+  state.publish_at = new Date(e.target.value).toISOString();
+  showStep(6);
+});
+
+// Step 6: preview
+function renderPreview() {
+  const preview = document.getElementById("preview");
+  preview.innerHTML = `
+    <strong>Official Notice (Preview)</strong><br><br>
+    ${state.notice_group.replace(/_/g, " ")} – ${state.notice_action.replace(/_/g, " ")}<br>
+    Effective date: ${state.effective_date}<br>
+    ${state.reason_code ? "Reason: " + state.reason_code : ""}
+  `;
+}
+
+// Publish notice
+document.getElementById("confirmPublish").addEventListener("click", async () => {
+  if (!state.publish_at) state.publish_at = new Date().toISOString();
+
+  const { error } = await supabase.from("notices").insert({
+    notice_group: state.notice_group,
+    notice_action: state.notice_action,
+    effective_date: state.effective_date,
+    reason_code: state.reason_code,
+    publish_at: state.publish_at,
+    supersedes_id: state.supersedes_id
+  });
+
+  if (error) {
+    alert("Publish failed. Check console.");
+    console.error(error);
+    return;
+  }
+
+  alert("Notice published successfully.");
+  window.location.reload();
+});
+
+// Cancel wizard
+document.getElementById("cancelWizard").addEventListener("click", () => {
+  wizard.classList.add("hidden");
+});
+
+// Active button helper
+function setActive(btn) {
+  btn.parentElement.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
 
