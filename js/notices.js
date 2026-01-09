@@ -67,8 +67,6 @@ window.goBack = function () {
 /* ================= NOTICE WIZARD LOGIC ================= */
 
 // Wizard elements
-const wizard = document.getElementById("wizard");
-const steps = [...document.querySelectorAll(".wizard-step")];
 
 // Wizard state
 const state = {
@@ -88,14 +86,16 @@ const ACTIONS = {
   general: ["holiday", "seminar", "important_info", "correction"]
 };
 
-// Show step helper
 function showStep(stepNumber) {
+  if (!steps) return;
+
   steps.forEach(s => s.classList.add("hidden"));
   const step = document.querySelector(`.wizard-step[data-step="${stepNumber}"]`);
   if (step) step.classList.remove("hidden");
 
   if (stepNumber === 6) renderPreview();
 }
+
 
 // Step 1: notice group selection
 document.querySelectorAll("[data-group]").forEach(btn => {
@@ -205,4 +205,68 @@ function setActive(btn) {
   btn.classList.add("active");
 }
 
+/* ================= INITIALISE WIZARD AFTER DOM LOAD ================= */
+
+let wizard;
+let steps;
+
+document.addEventListener("DOMContentLoaded", () => {
+  wizard = document.getElementById("wizard");
+  steps = [...document.querySelectorAll(".wizard-step")];
+
+  // Safety check
+  if (!wizard || steps.length === 0) {
+    console.error("Wizard DOM not found");
+    return;
+  }
+
+  // Step 1: notice group selection
+  document.querySelectorAll("[data-group]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.notice_group = btn.dataset.group;
+      setActive(btn);
+      loadActions();
+      showStep(2);
+    });
+  });
+
+  // Step 3: effective date
+  document.getElementById("effectiveDate").addEventListener("change", e => {
+    state.effective_date = e.target.value;
+    showStep(4);
+  });
+
+  // Step 4: reason
+  document.querySelectorAll("[data-reason]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.reason_code = btn.dataset.reason || null;
+      setActive(btn);
+      showStep(5);
+    });
+  });
+
+  // Publish mode
+  document.querySelectorAll('input[name="publishMode"]').forEach(radio => {
+    radio.addEventListener("change", () => {
+      const dt = document.getElementById("publishAt");
+      if (radio.value === "later") {
+        dt.classList.remove("hidden");
+        state.publish_at = null;
+      } else {
+        dt.classList.add("hidden");
+        state.publish_at = new Date().toISOString();
+        showStep(6);
+      }
+    });
+  });
+
+  document.getElementById("publishAt").addEventListener("change", e => {
+    state.publish_at = new Date(e.target.value).toISOString();
+    showStep(6);
+  });
+
+  document.getElementById("cancelWizard").addEventListener("click", () => {
+    wizard.classList.add("hidden");
+  });
+});
 
