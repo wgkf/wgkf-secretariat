@@ -308,20 +308,15 @@ function initPublishStep() {
   }
 }
 function initialisePublishStep() {
-  const checked = document.querySelector(
-    'input[name="publishMode"]:checked'
-  );
+  dom.publishAt.classList.add("hidden");
+  state.wizard.publish_at = null;
 
-  if (!checked) return;
-
-  if (checked.value === "now") {
-    dom.publishAt.classList.add("hidden");
-    state.wizard.publish_at = new Date().toISOString();
-  } else {
-    dom.publishAt.classList.remove("hidden");
-    state.wizard.publish_at = null;
-  }
+  // ensure no radio is forced
+  document.querySelectorAll('input[name="publishMode"]').forEach(r => {
+    r.checked = false;
+  });
 }
+
 
 
 /* =========================================================
