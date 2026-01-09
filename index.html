@@ -1,62 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>WGKF Secretariat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<body class="login-page">
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Libre+Baskerville&display=swap" rel="stylesheet">
+<main class="login-wrapper">
+  <div class="login-card">
 
-  <link rel="stylesheet" href="css/secretariat.css">
-</head>
-
-<body>
-
-  <main class="login-wrapper">
-
-    <!-- 🔷 IDENTITY HEADER -->
     <div class="login-header">
       <img
         src="https://raw.githubusercontent.com/wgkf/home/main/wgkf%20logo.png"
-        alt="West Bengal Goju-Ryu Karate-Do Foundation Logo"
+        alt="WGKF Logo"
         class="login-logo"
-      />
-
+      >
       <h1 class="org-name">
         West Bengal Goju-Ryu Karate-Do Foundation
       </h1>
-
-      <p class="portal-name">
-        Secretariat Portal • Authorized Access Only
-      </p>
+      <h2 class="portal-name">Secretariat Portal</h2>
     </div>
 
-    <!-- 🔐 LOGIN CARD -->
-    <div class="login-card">
+    <form id="loginForm" novalidate>
+      <label>
+        Email
+        <input type="email" id="email" required />
+      </label>
 
-      <form id="loginForm" novalidate>
+      <label>
+        Password
+        <input type="password" id="password" required />
+      </label>
 
-        <label>
-          Email
-          <input type="email" id="email" required />
-        </label>
+      <button type="submit">Sign In</button>
+      <p id="errorMsg" class="error"></p>
+    </form>
 
-        <label>
-          Password
-          <input type="password" id="password" required />
-        </label>
+  </div>
+</main>
 
-        <button type="submit">Sign In</button>
-
-        <p id="errorMsg" class="error"></p>
-
-      </form>
-
-    </div>
-
-  </main>
-
-  <script type="module" src="js/auth.js"></script>
 </body>
-</html>
