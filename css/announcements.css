@@ -13,6 +13,8 @@
 
 /* ================= INLINE CHECKBOX FIX ================= */
 
+/* ================= INLINE SINGLE-LINE CHECKBOX ================= */
+
 .checkbox {
   display: inline-flex;
   align-items: center;
@@ -20,14 +22,17 @@
   font-size: 14px;
   margin: 12px 0;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .checkbox span {
+  display: inline;
   white-space: nowrap;
 }
 
 .checkbox input {
   margin: 0;
+  flex-shrink: 0;
 }
 
 
