@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WGKF Secretariat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonts (same family as main site) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Libre+Baskerville&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/secretariat.css">
+</head>
+
+<body>
+
+  <main class="login-wrapper">
+
+    <div class="login-card">
+
+      <h1 class="org-name">West Bengal Goju-Ryu Karate-Do Foundation</h1>
+      <h2 class="portal-name">Secretariat Portal</h2>
+
+      <form id="loginForm" novalidate>
+
+        <label>
+          Email
+          <input type="email" id="email" required />
+        </label>
+
+        <label>
+          Password
+          <input type="password" id="password" required />
+        </label>
+
+        <button type="submit">Sign In</button>
+
+        <p id="errorMsg" class="error"></p>
+
+      </form>
+
+    </div>
+
+  </main>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
