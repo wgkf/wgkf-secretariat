@@ -62,7 +62,8 @@ publishBtn.addEventListener("click", async () => {
   // Reset UI
   textArea.value = "";
   expiryCheckbox.checked = false;
-  expiryInput.classList.add("hidden");
+  expiryBox.classList.add("hidden");
+  expiryInput.value = "";
   charCount.textContent = "0 / 180";
 
   loadAnnouncements();
