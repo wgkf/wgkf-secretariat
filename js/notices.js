@@ -9,29 +9,28 @@ const supabase = createClient(
 );
 
 /* =========================================================
-   ENUMS
+   STATES
 ========================================================= */
-const UI_STATE = Object.freeze({
-  UNAUTHENTICATED: "UNAUTHENTICATED",
+const UI_STATE = {
   IDLE: "IDLE",
   WIZARD: "WIZARD",
   PUBLISHING: "PUBLISHING"
-});
+};
 
-const WIZARD_STEP = Object.freeze({
+const STEP = {
   GROUP: 1,
   ACTION: 2,
   DATE: 3,
   REASON: 4,
-  PUBLISH_MODE: 5,
+  PUBLISH: 5,
   PREVIEW: 6
-});
+};
 
 /* =========================================================
    STATE
 ========================================================= */
 const state = {
-  ui: UI_STATE.UNAUTHENTICATED,
+  ui: UI_STATE.IDLE,
   publishing: false,
   wizard: {
     step: null,
@@ -61,25 +60,19 @@ let dom = {};
 /* =========================================================
    INIT
 ========================================================= */
-document.addEventListener("DOMContentLoaded", init);
-
-async function init() {
+document.addEventListener("DOMContentLoaded", async () => {
   bindDom();
   await guardSession();
   await loadNotices();
   render();
-}
+});
 
 /* =========================================================
-   SESSION GUARD
+   AUTH
 ========================================================= */
 async function guardSession() {
   const { data } = await supabase.auth.getSession();
-  if (!data.session) {
-    window.location.href = "index.html";
-    return;
-  }
-  state.ui = UI_STATE.IDLE;
+  if (!data.session) window.location.href = "index.html";
 }
 
 /* =========================================================
@@ -89,7 +82,7 @@ function bindDom() {
   dom = {
     wizard: document.getElementById("wizard"),
     steps: [...document.querySelectorAll(".wizard-step")],
-    actionsBox: document.getElementById("actions"),
+    actions: document.getElementById("actions"),
     effectiveDate: document.getElementById("effectiveDate"),
     publishAt: document.getElementById("publishAt"),
     preview: document.getElementById("preview"),
@@ -98,12 +91,7 @@ function bindDom() {
     startBtn: document.getElementById("startNoticeBtn"),
     cancelBtn: document.getElementById("cancelWizard"),
     confirmBtn: document.getElementById("confirmPublish"),
-
-    next1: document.getElementById("nextStep1"),
-    next2: document.getElementById("nextStep2"),
-    next3: document.getElementById("nextStep3"),
-    next4: document.getElementById("nextStep4"),
-    next5: document.getElementById("nextStep5"),
+    backBtn: document.getElementById("backToDashboardBtn"),
 
     back2: document.getElementById("backStep2"),
     back3: document.getElementById("backStep3"),
@@ -114,36 +102,32 @@ function bindDom() {
   dom.startBtn.onclick = startWizard;
   dom.cancelBtn.onclick = cancelWizard;
   dom.confirmBtn.onclick = publishNotice;
+  dom.backBtn.onclick = () => window.location.href = "dashboard.html";
 
-  dom.next1.onclick = () => gotoStep(WIZARD_STEP.ACTION, loadActions);
-  dom.next2.onclick = () => gotoStep(WIZARD_STEP.DATE);
-  dom.next3.onclick = () => gotoStep(WIZARD_STEP.REASON);
-  dom.next4.onclick = () => gotoStep(WIZARD_STEP.PUBLISH_MODE);
-  dom.next5.onclick = () => gotoStep(WIZARD_STEP.PREVIEW);
-
-  dom.back2.onclick = () => gotoStep(WIZARD_STEP.GROUP);
-  dom.back3.onclick = () => gotoStep(WIZARD_STEP.ACTION);
-  dom.back4.onclick = () => gotoStep(WIZARD_STEP.DATE);
-  dom.back5.onclick = () => gotoStep(WIZARD_STEP.REASON);
+  dom.back2.onclick = () => goto(STEP.GROUP);
+  dom.back3.onclick = () => goto(STEP.ACTION);
+  dom.back4.onclick = () => goto(STEP.DATE);
+  dom.back5.onclick = () => goto(STEP.REASON);
 
   document.querySelectorAll("[data-group]").forEach(b =>
     b.onclick = () => {
       state.wizard.notice_group = b.dataset.group;
       setActive(b);
-      dom.next1.disabled = false;
+      loadActions(b.dataset.group);
+      goto(STEP.ACTION);
     }
   );
 
   dom.effectiveDate.onchange = e => {
     state.wizard.effective_date = e.target.value;
-    dom.next3.disabled = false;
+    goto(STEP.REASON);
   };
 
   document.querySelectorAll("[data-reason]").forEach(b =>
     b.onclick = () => {
       state.wizard.reason_code = b.dataset.reason || null;
       setActive(b);
-      dom.next4.disabled = false;
+      goto(STEP.PUBLISH);
     }
   );
 
@@ -152,29 +136,27 @@ function bindDom() {
       if (r.value === "later") {
         dom.publishAt.classList.remove("hidden");
         state.wizard.publish_at = null;
-        dom.next5.disabled = true;
       } else {
         dom.publishAt.classList.add("hidden");
         state.wizard.publish_at = new Date().toISOString();
-        dom.next5.disabled = false;
+        goto(STEP.PREVIEW);
       }
     }
   );
 
   dom.publishAt.onchange = e => {
     state.wizard.publish_at = new Date(e.target.value).toISOString();
-    dom.next5.disabled = false;
+    goto(STEP.PREVIEW);
   };
 }
 
 /* =========================================================
-   WIZARD FLOW
+   WIZARD CONTROL
 ========================================================= */
 function startWizard() {
   resetWizard();
   state.ui = UI_STATE.WIZARD;
-  state.wizard.step = WIZARD_STEP.GROUP;
-  render();
+  goto(STEP.GROUP);
 }
 
 function cancelWizard() {
@@ -183,8 +165,7 @@ function cancelWizard() {
   render();
 }
 
-function gotoStep(step, hook) {
-  if (hook) hook(state.wizard.notice_group);
+function goto(step) {
   state.wizard.step = step;
   render();
 }
@@ -198,25 +179,22 @@ function resetWizard() {
     reason_code: null,
     publish_at: null
   };
-
-  [dom.next1, dom.next2, dom.next3, dom.next4, dom.next5]
-    .forEach(b => b && (b.disabled = true));
 }
 
 /* =========================================================
-   ACTION LOADER
+   ACTIONS
 ========================================================= */
 function loadActions(group) {
-  dom.actionsBox.innerHTML = "";
+  dom.actions.innerHTML = "";
   ACTIONS[group].forEach(a => {
     const b = document.createElement("button");
     b.textContent = a.replace(/_/g, " ");
     b.onclick = () => {
       state.wizard.notice_action = a;
       setActive(b);
-      dom.next2.disabled = false;
+      goto(STEP.DATE);
     };
-    dom.actionsBox.appendChild(b);
+    dom.actions.appendChild(b);
   });
 }
 
@@ -227,17 +205,16 @@ function render() {
   dom.steps.forEach(s => s.classList.add("hidden"));
   dom.wizard.classList.toggle("hidden", state.ui !== UI_STATE.WIZARD);
 
-  if (state.ui === UI_STATE.PUBLISHING) {
-    dom.preview.innerHTML = "<strong>Publishing notice…</strong>";
-    return;
-  }
-
   if (state.ui === UI_STATE.WIZARD) {
     const step = document.querySelector(`.wizard-step[data-step="${state.wizard.step}"]`);
     if (step) step.classList.remove("hidden");
 
-    dom.confirmBtn.disabled = state.wizard.step !== WIZARD_STEP.PREVIEW;
-    if (state.wizard.step === WIZARD_STEP.PREVIEW) renderPreview();
+    dom.confirmBtn.disabled = state.wizard.step !== STEP.PREVIEW;
+    if (state.wizard.step === STEP.PREVIEW) renderPreview();
+  }
+
+  if (state.ui === UI_STATE.PUBLISHING) {
+    dom.preview.innerHTML = "<strong>Publishing notice…</strong>";
   }
 }
 
@@ -305,7 +282,7 @@ function setActive(btn) {
 }
 
 /* =========================================================
-   UNLOAD GUARD (CORRECT)
+   UNLOAD GUARD
 ========================================================= */
 window.addEventListener("beforeunload", e => {
   if (state.ui === UI_STATE.WIZARD) {
