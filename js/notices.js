@@ -133,17 +133,19 @@ function bindDom() {
     }
   );
 
-  document.querySelectorAll('input[name="publishMode"]').forEach(r => {
-  r.onchange = () => {
-    if (r.value === "later") {
+document.querySelectorAll('input[name="publishMode"]').forEach(radio => {
+  radio.addEventListener("click", () => {
+    if (radio.value === "later") {
       dom.publishAt.classList.remove("hidden");
       state.wizard.publish_at = null;
-    } else {
+    }
+
+    if (radio.value === "now") {
       dom.publishAt.classList.add("hidden");
       state.wizard.publish_at = new Date().toISOString();
-      setTimeout(() => goto(STEP.PREVIEW), 120);
+      goto(STEP.PREVIEW); // 🔑 USER INTENT
     }
-  };
+  });
 });
 
 
@@ -315,14 +317,12 @@ function initialisePublishStep() {
   if (checked.value === "now") {
     dom.publishAt.classList.add("hidden");
     state.wizard.publish_at = new Date().toISOString();
-
-    // auto-advance because "now" is already valid
-    setTimeout(() => goto(STEP.PREVIEW), 120);
   } else {
     dom.publishAt.classList.remove("hidden");
     state.wizard.publish_at = null;
   }
 }
+
 
 /* =========================================================
    UNLOAD GUARD
