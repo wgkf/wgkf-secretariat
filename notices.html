@@ -40,6 +40,7 @@
       <button data-group="examination">Examination</button>
       <button data-group="meeting">Meeting</button>
       <button data-group="general">General</button>
+      <button class="primary-action" id="nextStep1" disabled>Next</button>
     </div>
   </div>
 
@@ -47,12 +48,18 @@
   <div class="wizard-step hidden" data-step="2">
     <h3>2) Choose Action</h3>
     <div class="options" id="actions"></div>
+    <button class="secondary-action" id="backStep2">Back</button>
+<button class="primary-action" id="nextStep2" disabled>Next</button>
+
   </div>
 
   <!-- STEP 3 -->
   <div class="wizard-step hidden" data-step="3">
     <h3>3) Effective Date</h3>
     <input type="date" id="effectiveDate" />
+    <button class="secondary-action" id="backStep3">Back</button>
+<button class="primary-action" id="nextStep3" disabled>Next</button>
+
   </div>
 
   <!-- STEP 4 -->
@@ -64,6 +71,9 @@
       <button data-reason="weather">Weather</button>
       <button data-reason="emergency">Emergency</button>
       <button data-reason="administrative">Administrative</button>
+      <button class="secondary-action" id="backStep4">Back</button>
+<button class="primary-action" id="nextStep4" disabled>Next</button>
+
     </div>
   </div>
 
@@ -79,6 +89,9 @@
       Schedule for later
     </label>
     <input type="datetime-local" id="publishAt" class="hidden" />
+    <button class="secondary-action" id="backStep5">Back</button>
+<button class="primary-action" id="nextStep5" disabled>Next</button>
+
   </div>
 
   <!-- STEP 6 -->

@@ -74,6 +74,60 @@ async function init() {
   bindDom();
   await guardSession();
   await loadNotices();
+  // STEP 1 → STEP 2
+dom.nextStep1.addEventListener("click", () => {
+  if (!state.wizard.notice_group) return;
+  state.wizard.step = WIZARD_STEP.ACTION;
+  loadActions(state.wizard.notice_group);
+  render();
+});
+
+// STEP 2 → STEP 3
+dom.nextStep2.addEventListener("click", () => {
+  if (!state.wizard.notice_action) return;
+  state.wizard.step = WIZARD_STEP.DATE;
+  render();
+});
+
+// STEP 3 → STEP 4
+dom.nextStep3.addEventListener("click", () => {
+  if (!state.wizard.effective_date) return;
+  state.wizard.step = WIZARD_STEP.REASON;
+  render();
+});
+
+// STEP 4 → STEP 5
+dom.nextStep4.addEventListener("click", () => {
+  state.wizard.step = WIZARD_STEP.PUBLISH_MODE;
+  render();
+});
+
+// STEP 5 → STEP 6
+dom.nextStep5.addEventListener("click", () => {
+  if (!state.wizard.publish_at) return;
+  state.wizard.step = WIZARD_STEP.PREVIEW;
+  render();
+});
+dom.backStep2.addEventListener("click", () => {
+  state.wizard.step = WIZARD_STEP.GROUP;
+  render();
+});
+
+dom.backStep3.addEventListener("click", () => {
+  state.wizard.step = WIZARD_STEP.ACTION;
+  render();
+});
+
+dom.backStep4.addEventListener("click", () => {
+  state.wizard.step = WIZARD_STEP.DATE;
+  render();
+});
+
+dom.backStep5.addEventListener("click", () => {
+  state.wizard.step = WIZARD_STEP.REASON;
+  render();
+});
+
   render();
 }
 
@@ -89,6 +143,7 @@ async function guardSession() {
   state.ui = UI_STATE.IDLE;
 }
 
+
 /* =========================================================
    DOM BINDING (NO INLINE HANDLERS)
    ========================================================= */
@@ -101,6 +156,17 @@ function bindDom() {
     publishAt: document.getElementById("publishAt"),
     preview: document.getElementById("preview"),
     noticeList: document.getElementById("noticeList"),
+      nextStep1: document.getElementById("nextStep1"),
+  nextStep2: document.getElementById("nextStep2"),
+  nextStep3: document.getElementById("nextStep3"),
+  nextStep4: document.getElementById("nextStep4"),
+  nextStep5: document.getElementById("nextStep5"),
+
+  backStep2: document.getElementById("backStep2"),
+  backStep3: document.getElementById("backStep3"),
+  backStep4: document.getElementById("backStep4"),
+  backStep5: document.getElementById("backStep5"),
+
 
     startBtn: document.getElementById("startNoticeBtn"),
     confirmBtn: document.getElementById("confirmPublish"),
@@ -122,44 +188,48 @@ function bindDom() {
 
   // Step 3
   dom.effectiveDate.addEventListener("change", e => {
-    if (state.wizard.step !== WIZARD_STEP.DATE) return;
-    state.wizard.effective_date = e.target.value;
-    state.wizard.step = WIZARD_STEP.REASON;
-    render();
-  });
+  if (state.wizard.step !== WIZARD_STEP.DATE) return;
+
+  state.wizard.effective_date = e.target.value;
+  dom.nextStep3.disabled = false; // 🔑 ENABLE NEXT
+});
+
 
   // Step 4
   document.querySelectorAll("[data-reason]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (state.wizard.step !== WIZARD_STEP.REASON) return;
-      state.wizard.reason_code = btn.dataset.reason || null;
-      state.wizard.step = WIZARD_STEP.PUBLISH_MODE;
-      render();
-    });
+  btn.addEventListener("click", () => {
+    if (state.wizard.step !== WIZARD_STEP.REASON) return;
+
+    state.wizard.reason_code = btn.dataset.reason || null;
+    setActive(btn);
+
+    dom.nextStep4.disabled = false; // 🔑 ENABLE NEXT
   });
+});
+
 
   // Step 5
-  document.querySelectorAll('input[name="publishMode"]').forEach(radio => {
-    radio.addEventListener("change", () => {
-      if (state.wizard.step !== WIZARD_STEP.PUBLISH_MODE) return;
+ document.querySelectorAll('input[name="publishMode"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    if (state.wizard.step !== WIZARD_STEP.PUBLISH_MODE) return;
 
-      if (radio.value === "later") {
-        dom.publishAt.classList.remove("hidden");
-        state.wizard.publish_at = null;
-      } else {
-        dom.publishAt.classList.add("hidden");
-        state.wizard.publish_at = new Date().toISOString();
-        state.wizard.step = WIZARD_STEP.PREVIEW;
-        render();
-      }
-    });
+    if (radio.value === "later") {
+      dom.publishAt.classList.remove("hidden");
+      state.wizard.publish_at = null;
+    } else {
+      dom.publishAt.classList.add("hidden");
+      state.wizard.publish_at = new Date().toISOString();
+    }
+
+    dom.nextStep5.disabled = false; // 🔑 ENABLE NEXT
   });
+});
+
 
   dom.publishAt.addEventListener("change", e => {
     if (state.wizard.step !== WIZARD_STEP.PUBLISH_MODE) return;
     state.wizard.publish_at = new Date(e.target.value).toISOString();
-    state.wizard.step = WIZARD_STEP.PREVIEW;
-    render();
+    
   });
 }
 
@@ -189,8 +259,17 @@ function resetWizard() {
     publish_at: null,
     supersedes_id: null
   };
+
+  // 🔒 Reset navigation buttons
+  dom.nextStep1.disabled = true;
+  dom.nextStep2.disabled = true;
+  dom.nextStep3.disabled = true;
+  dom.nextStep4.disabled = true;
+  dom.nextStep5.disabled = true;
+
   state.error = null;
 }
+
 
 /* =========================================================
    STEP HANDLERS
@@ -199,27 +278,31 @@ function selectGroup(group, btn) {
   if (state.wizard.step !== WIZARD_STEP.GROUP) return;
 
   state.wizard.notice_group = group;
-  state.wizard.step = WIZARD_STEP.ACTION;
-  loadActions(group);
   setActive(btn);
-  render();
+
+  dom.nextStep1.disabled = false; // 🔑 ENABLE NEXT
 }
+
 
 function loadActions(group) {
   dom.actionsBox.innerHTML = "";
+
   ACTIONS[group].forEach(action => {
     const b = document.createElement("button");
     b.textContent = action.replace(/_/g, " ");
+
     b.addEventListener("click", () => {
       if (state.wizard.step !== WIZARD_STEP.ACTION) return;
+
       state.wizard.notice_action = action;
-      state.wizard.step = WIZARD_STEP.DATE;
       setActive(b);
-      render();
+      dom.nextStep2.disabled = false;
     });
-    dom.actionsBox.appendChild(b);
+
+    dom.actionsBox.appendChild(b); // 🔑 YOU MISSED THIS
   });
 }
+
 
 /* =========================================================
    RENDER (PURE)
@@ -241,6 +324,50 @@ function render() {
       dom.confirmBtn.disabled = true;
     }
   }
+// ================= UI MODE =================
+if (state.ui === UI_STATE.PUBLISHING) {
+  dom.wizard.classList.remove("hidden");
+  dom.steps.forEach(s => s.classList.add("hidden"));
+  dom.preview.innerHTML = "<strong>Publishing notice…</strong>";
+  return;
+}
+
+// ================= WIZARD MODE =================
+if (state.ui === UI_STATE.WIZARD) {
+  const stepEl = document.querySelector(
+    `.wizard-step[data-step="${state.wizard.step}"]`
+  );
+  if (stepEl) stepEl.classList.remove("hidden");
+
+  // Reset Next buttons based on step
+  if (state.wizard.step === WIZARD_STEP.GROUP) {
+    dom.nextStep1.disabled = !state.wizard.notice_group;
+  }
+
+  if (state.wizard.step === WIZARD_STEP.ACTION) {
+    dom.nextStep2.disabled = !state.wizard.notice_action;
+  }
+
+  if (state.wizard.step === WIZARD_STEP.DATE) {
+    dom.nextStep3.disabled = !state.wizard.effective_date;
+  }
+
+  if (state.wizard.step === WIZARD_STEP.REASON) {
+    dom.nextStep4.disabled = false;
+  }
+
+  if (state.wizard.step === WIZARD_STEP.PUBLISH_MODE) {
+    dom.nextStep5.disabled = !state.wizard.publish_at;
+  }
+
+  dom.confirmBtn.disabled = state.wizard.step !== WIZARD_STEP.PREVIEW;
+
+  if (state.wizard.step === WIZARD_STEP.PREVIEW) {
+    renderPreview();
+  }
+}
+
+
 }
 
 /* =========================================================
@@ -348,3 +475,10 @@ function setActive(btn) {
     .forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
 }
+
+window.addEventListener("beforeunload", (e) => {
+  if (state.ui === UI_STATE.WIZARD) {
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
