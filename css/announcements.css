@@ -11,17 +11,22 @@
   margin: 6px 2px 12px;
 }
 
-/* Checkbox */
+/* ================= CHECKBOX ALIGNMENT FIX ================= */
+
 .checkbox {
-  display: block;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   font-size: 14px;
   margin: 12px 0;
   cursor: pointer;
 }
 
 .checkbox input {
-  margin-right: 6px;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
+
 
 /* Announcement list */
 .simple-list {
