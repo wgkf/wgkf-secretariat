@@ -1,4 +1,7 @@
 import { supabase } from "./supabaseClient.js";
+import { getUserContext } from "./role.js";
+
+const ctx = await getUserContext();
 
 /* ================= AUTH GUARD ================= */
 async function requireAuth() {
@@ -38,49 +41,36 @@ expiryCheckbox.addEventListener("change", () => {
   expiryBox.classList.toggle("hidden", !expiryCheckbox.checked);
 });
 
-/* ================= PUBLISH ================= */
-publishBtn.addEventListener("click", async () => {
-
-      await requireAuth();
-
+document.getElementById("saveDraft").onclick = async () => {
   const content = textArea.value.trim();
-  if (!content) {
-    alert("Announcement cannot be empty.");
-    return;
-  }
+  if (!content) return alert("Content required");
 
-  publishBtn.disabled = true;
-
-  const payload = {
+  await supabase.from("announcements").insert({
     content,
-    is_active: true
-  };
-
-  if (expiryCheckbox.checked && expiryInput.value) {
-    payload.expires_at = new Date(expiryInput.value).toISOString();
-  }
-
-  const { error } = await supabase
-    .from("announcements")
-    .insert(payload);
-
-  publishBtn.disabled = false;
-
-  if (error) {
-    alert("Failed to publish announcement.");
-    console.error(error);
-    return;
-  }
-
-  // Reset UI
-  textArea.value = "";
-  expiryCheckbox.checked = false;
-  expiryBox.classList.add("hidden");
-  expiryInput.value = "";
-  charCount.textContent = "0 / 180";
+    status: "draft",
+    is_active: false,
+    expires_at: expiryInput.value
+      ? new Date(expiryInput.value).toISOString()
+      : null
+  });
 
   loadAnnouncements();
-});
+};
+document.getElementById("sendForApproval").onclick = async () => {
+  const content = textArea.value.trim();
+  if (!content) return alert("Content required");
+
+  await supabase.from("announcements").insert({
+    content,
+    status: "pending",
+    is_active: false,
+    expires_at: expiryInput.value
+      ? new Date(expiryInput.value).toISOString()
+      : null
+  });
+
+  loadAnnouncements();
+};
 
 /* ================= LOAD ================= */
 async function loadAnnouncements() {
@@ -90,7 +80,7 @@ async function loadAnnouncements() {
   const { data, error } = await supabase
     .from("announcements")
     .select("*")
-    .eq("is_active", true)
+    .in("status", ["draft", "pending"])
     .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .order("created_at", { ascending: false });
 
@@ -124,37 +114,13 @@ async function loadAnnouncements() {
 
     content.appendChild(meta);
 
-    /* Action */
-    const deactivateBtn = document.createElement("button");
-    deactivateBtn.textContent = "Deactivate";
-    deactivateBtn.onclick = () => deactivateAnnouncement(a.id);
+    
 
     li.append(content, deactivateBtn);
     list.appendChild(li);
   });
 }
 
-/* ================= DEACTIVATE ================= */
-async function deactivateAnnouncement(id) {
-
-      await requireAuth();
-
-  if (!confirm("Deactivate this announcement?")) return;
-
-  const { error } = await supabase
-    .from("announcements")
-    .update({ is_active: false })
-    .eq("id", id);
-
-  if (error) {
-  alert(error.message);
-  console.error("FULL ERROR OBJECT:", error);
-  return;
-}
-
-
-  loadAnnouncements();
-}
 
 /* ================= INIT ================= */
 loadAnnouncements();

@@ -1,3 +1,16 @@
+import { getUserContext } from "./role.js";
+import { getUserContext } from "./role.js";
+
+const ctx = await getUserContext();
+
+document.getElementById("userRole").textContent =
+  ctx.isSuperAdmin ? "Super Admin" : "Admin";
+
+/* Show super-admin-only blocks */
+document.querySelectorAll(".super-only").forEach(el => {
+  el.style.display = ctx.isSuperAdmin ? "block" : "none";
+});
+
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 const supabase = createClient(
