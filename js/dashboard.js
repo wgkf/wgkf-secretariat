@@ -34,3 +34,13 @@ window.logout = async function () {
   await supabase.auth.signOut();
   window.location.href = "index.html";
 };
+/* ================= CARD NAVIGATION ================= */
+document.addEventListener("click", (e) => {
+  const card = e.target.closest("[data-go]");
+  if (!card) return;
+
+  const page = card.getAttribute("data-go");
+  if (page) {
+    window.location.href = page;
+  }
+});
