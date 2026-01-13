@@ -45,14 +45,18 @@ document.getElementById("saveDraft").onclick = async () => {
   const content = textArea.value.trim();
   if (!content) return alert("Content required");
 
-  await supabase.from("announcements").insert({
-    content,
-    status: "draft",
-    is_active: false,
-    expires_at: expiryInput.value
-      ? new Date(expiryInput.value).toISOString()
-      : null
-  });
+ const { data: { session } } = await supabase.auth.getSession();
+
+await supabase.from("announcements").insert({
+  content,
+  status: "pending",          // or "draft" in the other case
+  is_active: false,
+  created_by: session.user.id,
+  expires_at: expiryInput.value
+    ? new Date(expiryInput.value).toISOString()
+    : null
+});
+
 
   loadAnnouncements();
 };
@@ -60,14 +64,18 @@ document.getElementById("sendForApproval").onclick = async () => {
   const content = textArea.value.trim();
   if (!content) return alert("Content required");
 
-  await supabase.from("announcements").insert({
-    content,
-    status: "pending",
-    is_active: false,
-    expires_at: expiryInput.value
-      ? new Date(expiryInput.value).toISOString()
-      : null
-  });
+  const { data: { session } } = await supabase.auth.getSession();
+
+await supabase.from("announcements").insert({
+  content,
+  status: "pending",          // or "draft" in the other case
+  is_active: false,
+  created_by: session.user.id,
+  expires_at: expiryInput.value
+    ? new Date(expiryInput.value).toISOString()
+    : null
+});
+
 
   loadAnnouncements();
 };
@@ -116,7 +124,7 @@ async function loadAnnouncements() {
 
     
 
-    li.append(content, deactivateBtn);
+   li.append(content);
     list.appendChild(li);
   });
 }
