@@ -1,3 +1,6 @@
+console.log("DASHBOARD JS LOADED");
+alert("dashboard.js loaded");
+
 /* ================= IMPORTS (TOP ONLY) ================= */
 import { getUserContext } from "./role.js";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
