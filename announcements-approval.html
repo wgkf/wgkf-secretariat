@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WGKF Secretariat – Announcement Approvals</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Libre+Baskerville&display=swap" rel="stylesheet">
+
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="css/secretariat.css">
+  <link rel="stylesheet" href="css/announcements.css">
+</head>
+
+<body>
+
+<main class="notices-wrapper">
+
+  <!-- HEADER -->
+  <header class="dashboard-header">
+    <h1>Secretariat</h1>
+    <p class="subhead">Announcement Approvals</p>
+  </header>
+
+  <!-- APPROVAL LIST -->
+  <section class="dashboard-section">
+    <h2>Pending Announcements</h2>
+
+    <div id="approvalList">
+      <p class="muted">Loading pending announcements…</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="dashboard-footer">
+    <button class="logout" onclick="window.location.href='dashboard.html'">
+      Back to Dashboard
+    </button>
+  </footer>
+
+</main>
+
+<!-- Approval logic -->
+<script type="module" src="js/announcements-approval.js"></script>
+
+</body>
+</html>
