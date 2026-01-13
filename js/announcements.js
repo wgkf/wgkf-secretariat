@@ -1,33 +1,22 @@
 import { supabase } from "./supabaseClient.js";
-import { getUserContext } from "./role.js";
-
-const ctx = await getUserContext();
-
-/* ================= AUTH GUARD ================= */
-async function requireAuth() {
-  const { data: { session } } = await supabase.auth.getSession();
-
-  console.log("SUPABASE SESSION:", session);
-  console.log("SUPABASE ROLE:", session?.user?.role);
-
-  if (!session) {
-    alert("Session expired. Please login again.");
-    window.location.href = "index.html";
-    throw new Error("Not authenticated");
-  }
-
-  return session;
-}
-
 
 /* ================= ELEMENTS ================= */
 const textArea = document.getElementById("announcementText");
 const charCount = document.getElementById("charCount");
-const publishBtn = document.getElementById("publishAnnouncement");
 const list = document.getElementById("announcementList");
 
 const expiryCheckbox = document.getElementById("setExpiry");
 const expiryInput = document.getElementById("expiryTime");
+const expiryBox = document.getElementById("expiryBox");
+
+const saveDraftBtn = document.getElementById("saveDraft");
+const sendForApprovalBtn = document.getElementById("sendForApproval");
+
+/* ================= BASIC GUARD ================= */
+if (!textArea || !saveDraftBtn || !sendForApprovalBtn) {
+  console.error("Announcement form elements missing");
+  throw new Error("UI not loaded correctly");
+}
 
 /* ================= CHAR COUNTER ================= */
 textArea.addEventListener("input", () => {
@@ -35,100 +24,114 @@ textArea.addEventListener("input", () => {
 });
 
 /* ================= EXPIRY TOGGLE ================= */
-const expiryBox = document.getElementById("expiryBox");
-
 expiryCheckbox.addEventListener("change", () => {
   expiryBox.classList.toggle("hidden", !expiryCheckbox.checked);
 });
 
-document.getElementById("saveDraft").onclick = async () => {
-  const content = textArea.value.trim();
-  if (!content) return alert("Content required");
+/* ================= HELPERS ================= */
+async function getSessionUser() {
+  const { data } = await supabase.auth.getSession();
+  if (!data.session) {
+    alert("Session expired. Please login again.");
+    window.location.href = "index.html";
+    throw new Error("No session");
+  }
+  return data.session.user;
+}
 
- const { data: { session } } = await supabase.auth.getSession();
-
-await supabase.from("announcements").insert({
-  content,
-  status: "pending",          // or "draft" in the other case
-  is_active: false,
-  created_by: session.user.id,
-  expires_at: expiryInput.value
+function getExpiry() {
+  return expiryCheckbox.checked && expiryInput.value
     ? new Date(expiryInput.value).toISOString()
-    : null
-});
+    : null;
+}
 
+/* ================= SAVE DRAFT ================= */
+saveDraftBtn.onclick = async () => {
+  const content = textArea.value.trim();
+  if (!content) {
+    alert("Announcement content is required.");
+    return;
+  }
 
+  const user = await getSessionUser();
+
+  const { error } = await supabase.from("announcements").insert({
+    content,
+    status: "draft",
+    is_active: false,
+    created_by: user.id,
+    expires_at: getExpiry()
+  });
+
+  if (error) {
+    console.error(error);
+    alert("Failed to save draft.");
+    return;
+  }
+
+  alert("Draft saved.");
   loadAnnouncements();
 };
-document.getElementById("sendForApproval").onclick = async () => {
+
+/* ================= SEND FOR APPROVAL ================= */
+sendForApprovalBtn.onclick = async () => {
   const content = textArea.value.trim();
-  if (!content) return alert("Content required");
+  if (!content) {
+    alert("Announcement content is required.");
+    return;
+  }
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const user = await getSessionUser();
 
-await supabase.from("announcements").insert({
-  content,
-  status: "pending",          // or "draft" in the other case
-  is_active: false,
-  created_by: session.user.id,
-  expires_at: expiryInput.value
-    ? new Date(expiryInput.value).toISOString()
-    : null
-});
+  const { error } = await supabase.from("announcements").insert({
+    content,
+    status: "pending",
+    is_active: false,
+    created_by: user.id,
+    expires_at: getExpiry()
+  });
 
+  if (error) {
+    console.error(error);
+    alert("Failed to send for approval.");
+    return;
+  }
 
+  alert("Sent for approval.");
   loadAnnouncements();
 };
 
-/* ================= LOAD ================= */
+/* ================= LOAD ADMIN DRAFTS ================= */
 async function loadAnnouncements() {
+  list.innerHTML = "<li class='muted'>Loading…</li>";
 
-  list.innerHTML = "<li class='muted'>Loading announcements…</li>";
+  const user = await getSessionUser();
 
   const { data, error } = await supabase
     .from("announcements")
     .select("*")
+    .eq("created_by", user.id)
     .in("status", ["draft", "pending"])
-    .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
     .order("created_at", { ascending: false });
 
   if (error) {
-    list.innerHTML = "<li class='muted'>Error loading announcements</li>";
     console.error(error);
+    list.innerHTML = "<li class='muted'>Failed to load drafts.</li>";
     return;
   }
 
   if (!data.length) {
-    list.innerHTML = "<li class='muted'>No active announcements</li>";
+    list.innerHTML = "<li class='muted'>No drafts yet.</li>";
     return;
   }
 
   list.innerHTML = "";
-
   data.forEach(a => {
     const li = document.createElement("li");
-
-    /* Content block */
-    const content = document.createElement("div");
-    content.className = "content";
-    content.textContent = a.content;
-
-    /* Meta */
-    const meta = document.createElement("small");
-    const created = new Date(a.created_at).toLocaleDateString();
-    meta.textContent = a.expires_at
-      ? `Published ${created} • Expires ${new Date(a.expires_at).toLocaleString()}`
-      : `Published ${created}`;
-
-    content.appendChild(meta);
-
-    
-
-   li.append(content);
+    li.textContent = `[${a.status.toUpperCase()}] ${a.content}`;
     list.appendChild(li);
   });
 }
-
 
 /* ================= INIT ================= */
 loadAnnouncements();

@@ -23,62 +23,50 @@
     <p class="subhead">Announcement Management</p>
   </header>
 
-  <!-- CREATE ANNOUNCEMENT -->
-  <section class="dashboard-section">
+ <!-- CREATE ANNOUNCEMENT -->
+<section class="dashboard-section">
 
-    <h2>New Announcement</h2>
-    <p class="muted">
-      Short handwritten message displayed as a running ribbon on the website.
-      <br>Maximum 180 characters.
-    </p>
-
-    <textarea
-      id="announcementText"
-      class="input-field"
-      rows="4"
-      maxlength="180"
-      placeholder="Write announcement here…"
-    ></textarea>
-
-    <div class="char-row">
-      <span id="charCount">0 / 180</span>
-    </div>
-    <div class="checkbox-row">
-  <label class="checkbox">
-    Auto-expire announcement
-    <input type="checkbox" id="setExpiry">
-  </label>
-</div>
-
-
-
-    <div id="expiryBox" class="hidden">
-
-  <label for="expiryTime" class="field-label">
-    Expiry Date & Time
-  </label>
-
-  <input
-    type="datetime-local"
-    id="expiryTime"
-    class="input-field"
-  />
-
-  <p class="field-help">
-    The announcement will automatically stop appearing on the website
-    after this date and time.
-    <br>
-    <strong>Uses your local system time.</strong>
+  <h2>New Announcement</h2>
+  <p class="muted">
+    Draft an announcement and send it for Super Admin approval.
+    <br>Maximum 180 characters.
   </p>
 
-</div>
+  <textarea
+    id="announcementText"
+    class="input-field"
+    rows="4"
+    maxlength="180"
+    placeholder="Write announcement here…"
+  ></textarea>
 
+  <div class="char-row">
+    <span id="charCount">0 / 180</span>
+  </div>
 
-    <button class="primary-action" id="publishAnnouncement">
-      Publish Announcement
+  <div class="checkbox-row">
+    <label class="checkbox">
+      Auto-expire announcement
+      <input type="checkbox" id="setExpiry">
+    </label>
+  </div>
+
+  <div id="expiryBox" class="hidden">
+    <label class="field-label">Expiry Date & Time</label>
+    <input type="datetime-local" id="expiryTime" class="input-field" />
+  </div>
+
+  <div class="action-row">
+    <button class="secondary-action" id="saveDraft">
+      Save Draft
     </button>
 
-  </section>
+    <button class="primary-action" id="sendForApproval">
+      Send for Approval
+    </button>
+  </div>
+
+</section>
 
   <!-- EXISTING ANNOUNCEMENTS -->
   <section class="dashboard-section">
