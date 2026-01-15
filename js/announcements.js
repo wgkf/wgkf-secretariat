@@ -232,8 +232,66 @@ async function loadMyAnnouncements() {
     list.appendChild(li);
   });
 }
+async function loadLiveAnnouncements() {
+  if (!ctx.isSuperAdmin) return;
+
+  const container = document.getElementById("liveAnnouncementList");
+  if (!container) return;
+
+  container.innerHTML = "<li class='muted'>Loading…</li>";
+
+  const { data, error } = await supabase
+    .from("announcements")
+    .select("*")
+    .eq("status", "published")
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    container.innerHTML = "<li class='muted'>Failed to load.</li>";
+    return;
+  }
+
+  if (!data.length) {
+    container.innerHTML = "<li class='muted'>No active announcements.</li>";
+    return;
+  }
+
+  container.innerHTML = "";
+
+  data.forEach(a => {
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      <div class="content">
+        ${a.content}
+        <small>
+          Published on ${new Date(a.created_at).toLocaleDateString()}
+        </small>
+      </div>
+    `;
+
+    const deactivateBtn = document.createElement("button");
+    deactivateBtn.textContent = "Deactivate";
+    deactivateBtn.onclick = async () => {
+      if (!confirm("Deactivate this announcement?")) return;
+
+      await supabase
+        .from("announcements")
+        .update({ is_active: false })
+        .eq("id", a.id);
+
+      loadLiveAnnouncements();
+    };
+
+    li.appendChild(deactivateBtn);
+    container.appendChild(li);
+  });
+}
 
 /* ======================================================
    INIT
 ====================================================== */
 loadMyAnnouncements();
+loadLiveAnnouncements();
