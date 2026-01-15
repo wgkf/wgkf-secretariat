@@ -1,6 +1,14 @@
 import { supabase } from "./supabaseClient.js";
+import { getUserContext } from "./role.js";
 
-/* ================= ELEMENTS ================= */
+/* ======================================================
+   INITIAL CONTEXT
+====================================================== */
+const ctx = await getUserContext();
+
+/* ======================================================
+   ELEMENTS
+====================================================== */
 const textArea = document.getElementById("announcementText");
 const charCount = document.getElementById("charCount");
 const list = document.getElementById("announcementList");
@@ -11,24 +19,43 @@ const expiryBox = document.getElementById("expiryBox");
 
 const saveDraftBtn = document.getElementById("saveDraft");
 const sendForApprovalBtn = document.getElementById("sendForApproval");
+const publishNowBtn = document.getElementById("publishNow");
 
-/* ================= BASIC GUARD ================= */
-if (!textArea || !saveDraftBtn || !sendForApprovalBtn) {
-  console.error("Announcement form elements missing");
-  throw new Error("UI not loaded correctly");
+/* ======================================================
+   BASIC UI VALIDATION
+====================================================== */
+if (!textArea || !saveDraftBtn) {
+  alert("Announcement UI failed to load.");
+  throw new Error("Required elements missing");
 }
 
-/* ================= CHAR COUNTER ================= */
+/* ======================================================
+   ROLE-BASED UI
+====================================================== */
+if (ctx.isSuperAdmin) {
+  if (sendForApprovalBtn) sendForApprovalBtn.style.display = "none";
+  if (publishNowBtn) publishNowBtn.classList.remove("hidden");
+} else {
+  if (publishNowBtn) publishNowBtn.style.display = "none";
+}
+
+/* ======================================================
+   CHAR COUNTER
+====================================================== */
 textArea.addEventListener("input", () => {
   charCount.textContent = `${textArea.value.length} / 180`;
 });
 
-/* ================= EXPIRY TOGGLE ================= */
+/* ======================================================
+   EXPIRY TOGGLE
+====================================================== */
 expiryCheckbox.addEventListener("change", () => {
   expiryBox.classList.toggle("hidden", !expiryCheckbox.checked);
 });
 
-/* ================= HELPERS ================= */
+/* ======================================================
+   HELPERS
+====================================================== */
 async function getSessionUser() {
   const { data } = await supabase.auth.getSession();
   if (!data.session) {
@@ -45,64 +72,117 @@ function getExpiry() {
     : null;
 }
 
-/* ================= SAVE DRAFT ================= */
+function resetForm() {
+  textArea.value = "";
+  charCount.textContent = "0 / 180";
+  expiryCheckbox.checked = false;
+  expiryBox.classList.add("hidden");
+  expiryInput.value = "";
+}
+
+/* ======================================================
+   SAVE DRAFT (ONE DRAFT PER USER)
+====================================================== */
 saveDraftBtn.onclick = async () => {
   const content = textArea.value.trim();
-  if (!content) {
-    alert("Announcement content is required.");
-    return;
-  }
+  if (!content) return alert("Content required");
 
   const user = await getSessionUser();
 
-  const { error } = await supabase.from("announcements").insert({
-    content,
-    status: "draft",
-    is_active: false,
-    created_by: user.id,
-    expires_at: getExpiry()
-  });
+  const { data: draft } = await supabase
+    .from("announcements")
+    .select("id")
+    .eq("created_by", user.id)
+    .eq("status", "draft")
+    .maybeSingle();
 
-  if (error) {
-    console.error(error);
-    alert("Failed to save draft.");
-    return;
+  if (draft) {
+    await supabase
+      .from("announcements")
+      .update({
+        content,
+        expires_at: getExpiry()
+      })
+      .eq("id", draft.id);
+  } else {
+    await supabase.from("announcements").insert({
+      content,
+      status: "draft",
+      is_active: false,
+      created_by: user.id,
+      expires_at: getExpiry()
+    });
   }
 
-  alert("Draft saved.");
-  loadAnnouncements();
+  alert("Draft saved");
+  loadMyAnnouncements();
 };
 
-/* ================= SEND FOR APPROVAL ================= */
-sendForApprovalBtn.onclick = async () => {
-  const content = textArea.value.trim();
-  if (!content) {
-    alert("Announcement content is required.");
-    return;
-  }
+/* ======================================================
+   SEND FOR APPROVAL (ADMIN ONLY)
+====================================================== */
+if (sendForApprovalBtn) {
+  sendForApprovalBtn.onclick = async () => {
+    const content = textArea.value.trim();
+    if (!content) return alert("Content required");
 
-  const user = await getSessionUser();
+    const user = await getSessionUser();
 
-  const { error } = await supabase.from("announcements").insert({
-    content,
-    status: "pending",
-    is_active: false,
-    created_by: user.id,
-    expires_at: getExpiry()
-  });
+    const { data } = await supabase
+      .from("announcements")
+      .update({
+        content,
+        status: "pending",
+        expires_at: getExpiry()
+      })
+      .eq("created_by", user.id)
+      .eq("status", "draft")
+      .select();
 
-  if (error) {
-    console.error(error);
-    alert("Failed to send for approval.");
-    return;
-  }
+    if (!data || data.length === 0) {
+      await supabase.from("announcements").insert({
+        content,
+        status: "pending",
+        is_active: false,
+        created_by: user.id,
+        expires_at: getExpiry()
+      });
+    }
 
-  alert("Sent for approval.");
-  loadAnnouncements();
-};
+    alert("Sent for approval");
+    resetForm();
+    loadMyAnnouncements();
+  };
+}
 
-/* ================= LOAD ADMIN DRAFTS ================= */
-async function loadAnnouncements() {
+/* ======================================================
+   PUBLISH NOW (SUPER ADMIN ONLY)
+====================================================== */
+if (publishNowBtn) {
+  publishNowBtn.onclick = async () => {
+    const content = textArea.value.trim();
+    if (!content) return alert("Content required");
+
+    const user = await getSessionUser();
+
+    await supabase.from("announcements").insert({
+      content,
+      status: "published",
+      is_active: true,
+      created_by: user.id,
+      expires_at: getExpiry()
+    });
+
+    alert("Published successfully");
+    resetForm();
+    loadMyAnnouncements();
+  };
+}
+
+/* ======================================================
+   LOAD USER ANNOUNCEMENTS (DRAFT + PENDING)
+====================================================== */
+async function loadMyAnnouncements() {
   list.innerHTML = "<li class='muted'>Loading…</li>";
 
   const user = await getSessionUser();
@@ -126,12 +206,34 @@ async function loadAnnouncements() {
   }
 
   list.innerHTML = "";
+
   data.forEach(a => {
     const li = document.createElement("li");
-    li.textContent = `[${a.status.toUpperCase()}] ${a.content}`;
+    li.innerHTML = `<strong>[${a.status.toUpperCase()}]</strong> ${a.content}`;
+
+    const reuseBtn = document.createElement("button");
+    reuseBtn.textContent = "Reuse";
+    reuseBtn.onclick = () => {
+      textArea.value = a.content;
+      charCount.textContent = `${a.content.length} / 180`;
+
+      if (a.expires_at) {
+        expiryCheckbox.checked = true;
+        expiryBox.classList.remove("hidden");
+        expiryInput.value = a.expires_at.slice(0, 16);
+      } else {
+        expiryCheckbox.checked = false;
+        expiryBox.classList.add("hidden");
+        expiryInput.value = "";
+      }
+    };
+
+    li.appendChild(reuseBtn);
     list.appendChild(li);
   });
 }
 
-/* ================= INIT ================= */
-loadAnnouncements();
+/* ======================================================
+   INIT
+====================================================== */
+loadMyAnnouncements();
