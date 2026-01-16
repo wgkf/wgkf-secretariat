@@ -122,7 +122,7 @@ saveDraftBtn.onclick = async () => {
     });
   }
 
-  alert("Draft saved");
+  alert("✅Draft saved");
   loadMyAnnouncements();
 };
 
@@ -132,7 +132,7 @@ saveDraftBtn.onclick = async () => {
 if (sendForApprovalBtn) {
   sendForApprovalBtn.onclick = async () => {
     const content = textArea.value.trim();
-    if (!content) return alert("Content required");
+    if (!content) return alert("❗Content required");
 
     const user = await getSessionUser();
 
@@ -157,7 +157,7 @@ if (sendForApprovalBtn) {
       });
     }
 
-    alert("Sent for approval");
+    alert("✅Sent for approval");
     resetForm();
     loadMyAnnouncements();
   };
@@ -169,7 +169,7 @@ if (sendForApprovalBtn) {
 if (publishNowBtn) {
   publishNowBtn.onclick = async () => {
     const content = textArea.value.trim();
-    if (!content) return alert("Content required");
+    if (!content) return alert("❗Content required");
 
     const user = await getSessionUser();
 
@@ -181,7 +181,7 @@ if (publishNowBtn) {
       expires_at: getExpiry()
     });
 
-    alert("Published successfully");
+    alert("✅Published successfully");
     resetForm();
     loadMyAnnouncements();
   };
@@ -303,3 +303,4 @@ async function loadLiveAnnouncements() {
 ====================================================== */
 loadMyAnnouncements();
 loadLiveAnnouncements();
+
