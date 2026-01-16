@@ -5,6 +5,14 @@ import { getUserContext } from "./role.js";
    INITIAL CONTEXT
 ====================================================== */
 const ctx = await getUserContext();
+/* ======================================================
+   FORCE VISIBILITY FOR SUPER-ADMIN SECTIONS (IMPORTANT)
+====================================================== */
+if (ctx.isSuperAdmin) {
+  document.querySelectorAll(".super-only").forEach(el => {
+    el.style.display = "block";
+  });
+}
 
 /* ======================================================
    ELEMENTS
