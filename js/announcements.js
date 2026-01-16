@@ -93,7 +93,7 @@ function resetForm() {
 ====================================================== */
 saveDraftBtn.onclick = async () => {
   const content = textArea.value.trim();
-  if (!content) return alert("Content required");
+  if (!content) return alert("❗Content required");
 
   const user = await getSessionUser();
 
@@ -122,7 +122,7 @@ saveDraftBtn.onclick = async () => {
     });
   }
 
-  alert("✅Draft saved");
+  alert("✅ Draft saved");
   loadMyAnnouncements();
 };
 
@@ -157,7 +157,7 @@ if (sendForApprovalBtn) {
       });
     }
 
-    alert("✅Sent for approval");
+    alert("✅ Sent for approval");
     resetForm();
     loadMyAnnouncements();
   };
@@ -181,7 +181,7 @@ if (publishNowBtn) {
       expires_at: getExpiry()
     });
 
-    alert("✅Published successfully");
+    alert("✅ Published successfully");
     resetForm();
     loadMyAnnouncements();
   };
@@ -303,4 +303,5 @@ async function loadLiveAnnouncements() {
 ====================================================== */
 loadMyAnnouncements();
 loadLiveAnnouncements();
+
 
